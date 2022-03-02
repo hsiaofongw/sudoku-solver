@@ -6,6 +6,10 @@ type CellDatum = {
   content: string;
   editable: boolean;
   type: 'condition' | 'answer';
+  secondaryHighlight?: boolean;
+  rowId: number;
+  colId: number;
+  id: number;
 };
 
 type Option = {
@@ -38,6 +42,8 @@ export class AppComponent {
     mode: new FormControl('readOnlyMode'),
   });
 
+  hoverCell: undefined | CellDatum = undefined;
+
   ngOnInit(): void {
 
     const input = [
@@ -52,9 +58,32 @@ export class AppComponent {
       ['.', '.', '.', '.', '8', '.', '.', '7', '9'],
     ];
 
-    this.gridData = input.map((row) =>
-      row.map((char) => ({ content: char, editable: false, type: char === '.' ? 'answer' : 'condition' }))
-    );
+    const gridData: CellDatum[][] = [];
+    for (let sbRowIdx = 0; sbRowIdx <= 2; sbRowIdx++) {
+      for (let sbColIdx = 0; sbColIdx <= 2; sbColIdx++) {
+        const minRowIdx = sbRowIdx * 3;
+        const maxRowIdx = (sbRowIdx+1) * 3 - 1;
+        const minColIdx = sbColIdx * 3;
+        const maxColIdx = (sbColIdx+1) * 3 - 1;
+        const subGrid: CellDatum[] = [];
+        for (let i = minRowIdx; i <= maxRowIdx; i++) {
+          for (let j = minColIdx; j <= maxColIdx; j++) {
+            const cell: CellDatum = {
+              content: input[i][j],
+              editable: false,
+              type: input[i][j] === '.' ? 'answer' : 'condition',
+              secondaryHighlight: false,
+              rowId: i,
+              colId: j,
+              id: i * 9 + j,
+            };
+            subGrid.push(cell);
+          }
+        }
+        gridData.push(subGrid);
+      }
+    }
+    this.gridData = gridData;
 
     this._modeForm.valueChanges.subscribe((formValue) => {
       this._setMode(formValue.mode ?? this.defaultMode);
@@ -75,5 +104,13 @@ export class AppComponent {
       this.gridData = this.gridData.map(row => row.map(cell => ({ ...cell, editable: true })));
     }
     else { }
+  }
+
+  handleEnter(cell: CellDatum): void {
+    this.hoverCell = cell;
+  }
+
+  handleOut(): void {
+    this.hoverCell = undefined;
   }
 }

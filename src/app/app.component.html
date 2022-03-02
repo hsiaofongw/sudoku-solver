@@ -2,8 +2,22 @@
   <div class="grid">
     <div *ngFor="let subgrid of gridData" class="sub-grid-container">
       <div class="sub-grid">
-        <div *ngFor="let cell of subgrid" class="cell" [ngClass]="{ 'cell-editable': cell.editable }">
-          <ng-container *ngIf="cell.content !== '.'">{{ cell.content }}</ng-container>
+        <div
+          (mouseenter)="handleEnter(cell)"
+          (mouseout)="handleOut()"
+          *ngFor="let cell of subgrid"
+          class="cell"
+          [ngClass]="{
+            'cell-editable': cell.editable,
+            'secondary-highlight':
+              (cell.rowId === hoverCell?.rowId || cell.colId === hoverCell?.colId) &&
+              (!(cell.rowId === hoverCell?.rowId && cell.colId === hoverCell?.colId)) &&
+              (hoverCell?.editable === true)
+          }"
+        >
+          <ng-container *ngIf="cell.content !== '.'">{{
+            cell.content
+          }}</ng-container>
         </div>
       </div>
     </div>
@@ -14,8 +28,13 @@
   <p>工作模式：</p>
   <div>
     <ng-container *ngFor="let opt of modeOptions">
-      <input formControlName="mode" type="radio" [id]="opt.value"
-        name="mode" [value]="opt.value">
+      <input
+        formControlName="mode"
+        type="radio"
+        [id]="opt.value"
+        name="mode"
+        [value]="opt.value"
+      />
       <label [for]="opt.value">{{ opt.label }}</label>
     </ng-container>
   </div>
