@@ -36,3 +36,27 @@
 .error {
   color: #FE959F;
 }
+
+.stats-container {
+
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  column-gap: 20px;
+
+  .stat-item {
+    display: flex;
+    align-items: center;
+    column-gap: 6px;
+
+    .stat-key::after {
+      content: ':';
+    }
+
+    .stat-value {
+      display: flex;
+      align-items: center;
+    }
+  }
+
+}

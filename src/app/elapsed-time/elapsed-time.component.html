@@ -1,0 +1,12 @@
+<ng-container *ngIf="hours >= 1">
+  <span>{{ hours.toFixed(0) }}</span>
+  <span>时</span>
+</ng-container>
+<ng-container *ngIf="minutes >= 1">
+  <span>{{ minutes.toFixed(0) }}</span>
+  <span>分</span>
+</ng-container>
+<ng-container *ngIf="seconds >= 1">
+  <span>{{ seconds.toFixed(0) }}</span>
+  <span>秒</span>
+</ng-container>

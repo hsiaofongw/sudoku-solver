@@ -2,7 +2,7 @@ import { Location } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { fromEvent, Subscription } from 'rxjs';
+import { fromEvent, interval, Subscription } from 'rxjs';
 import { solveRecursive, solveSudoku } from '../solve';
 
 type CellDatum = {
@@ -81,6 +81,8 @@ export class SudokuComponent {
   statEmptyCount = 0;
   statTotalCount = 0;
   statSuccess = false;
+  statStartTime: number = 0;
+  elapsedMs: number = 0;
 
   constructor(private route: ActivatedRoute, private router: Router, private location: Location) {}
 
@@ -107,6 +109,11 @@ export class SudokuComponent {
   }
 
   ngOnInit(): void {
+    interval(1000).subscribe(() => {
+      const now = new Date();
+      this.elapsedMs = now.valueOf() - this.statStartTime;
+    });
+
     const sbCoords = this.getSubboxArrangement();
     const emptyGridData: CellDatum[][] = [];
     for (const sb of sbCoords) {
@@ -133,6 +140,8 @@ export class SudokuComponent {
     });
 
     this.route.queryParams.subscribe((queryParams) => {
+      const now = new Date();
+      this.statStartTime = now.valueOf();
       this.currentSetting = queryParams['setting'];
       this.loadFromURLParam(queryParams['setting']);
     });

@@ -1,3 +1,47 @@
+<div class="stats-container">
+
+  <ng-template 
+    #statTpl 
+    let-key="key" 
+    let-valueTpl="valueTpl" 
+    let-value="value"
+  >
+    <div class="stat-item">
+      <div class="stat-key">{{ key }}</div>
+      <div class="stat-value">
+        <ng-container *ngIf="valueTpl">
+          <ng-container [ngTemplateOutlet]="valueTpl" [ngTemplateOutletContext]="{ value: value }"></ng-container>
+        </ng-container>
+        <ng-container *ngIf="valueTpl === undefined">
+            {{ value }}
+        </ng-container>
+      </div>
+    </div>
+  </ng-template>
+
+  <ng-container></ng-container>
+
+  <ng-template #elapsedTpl let-value="value">
+    <app-elapsed-time [elapsedMs]="elapsedMs"></app-elapsed-time>
+  </ng-template>
+
+  <ng-container
+    [ngTemplateOutlet]="statTpl"
+    [ngTemplateOutletContext]="{ key: '时间过去了', valueTpl: elapsedTpl, value: elapsedMs }"
+  ></ng-container>
+
+  <ng-container
+    [ngTemplateOutlet]="statTpl"
+    [ngTemplateOutletContext]="{ key: '空位', value: statEmptyCount }"
+  ></ng-container>
+
+  <ng-container
+    [ngTemplateOutlet]="statTpl"
+    [ngTemplateOutletContext]="{ key: '占位', value: statFillCount }"
+  ></ng-container>
+
+</div>
+
 <div class="grid-container">
   <div class="grid">
     <div *ngFor="let subgrid of gridData" class="sub-grid-container">

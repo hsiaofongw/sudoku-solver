@@ -6,12 +6,14 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { SudokuComponent } from './sudoku/sudoku.component';
 import { EntryComponent } from './entry/entry.component';
+import { ElapsedTimeComponent } from './elapsed-time/elapsed-time.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     SudokuComponent,
-    EntryComponent
+    EntryComponent,
+    ElapsedTimeComponent
   ],
   imports: [
     BrowserModule,
