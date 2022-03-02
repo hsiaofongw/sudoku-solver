@@ -1,3 +1,11 @@
+<ng-container *ngIf="years >= 1">
+  <span>{{ years.toFixed(0) }}</span>
+  <span>年</span>
+</ng-container>
+<ng-container *ngIf="days >= 1">
+  <span>{{ days.toFixed(0) }}</span>
+  <span>天</span>
+</ng-container>
 <ng-container *ngIf="hours >= 1">
   <span>{{ hours.toFixed(0) }}</span>
   <span>时</span>
