@@ -277,7 +277,7 @@ export class AppComponent {
           let conflict = false;
           for (let i1 = minRow; i1 <= maxRow; i1++) {
             for (let i2 = minCol; i2 <= maxCol; i2++) {
-              const compareCell = newGrid[i][j];
+              const compareCell = newGrid[i1][i2];
               if (compareCell.content === cell.content && cell.content !== '' && cell.content !== '.' && cell.id !== compareCell.id) {
                 compareCell.error = true;
                 conflict = true;
