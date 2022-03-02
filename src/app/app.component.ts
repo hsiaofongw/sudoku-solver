@@ -9,8 +9,10 @@ type CellDatum = {
   type: 'condition' | 'answer';
   rowId: number;
   colId: number;
+  subboxId: number;
   id: number;
   backgroundColor?: string;
+  error?: boolean;
 };
 
 type Option = {
@@ -19,6 +21,13 @@ type Option = {
 };
 
 type Mode = 'readOnlyMode' | 'conditionWriteOnlyMode' | 'answerWriteOnlyMode' | 'writeMode';
+
+type SubboxCoord = {
+  minRow: number;
+  maxRow: number;
+  minCol: number;
+  maxCol: number;
+}
 
 @Component({
   selector: 'app-root',
@@ -49,6 +58,28 @@ export class AppComponent {
   editingCell: undefined | CellDatum = undefined;
   keyPressSubscription?: Subscription;
 
+  /** 返回每个 sb 的 minRow, maxRow, minCol, maxCol,  */
+  private getSubboxArrangement(): SubboxCoord[] {
+    const sbCoords: SubboxCoord[] = [];
+
+    for (let sbRowIdx = 0; sbRowIdx <= 2; sbRowIdx++) {
+      for (let sbColIdx = 0; sbColIdx <= 2; sbColIdx++) {
+        const minRowIdx = sbRowIdx * 3;
+        const maxRowIdx = (sbRowIdx+1) * 3 - 1;
+        const minColIdx = sbColIdx * 3;
+        const maxColIdx = (sbColIdx+1) * 3 - 1;
+        sbCoords.push({
+          minRow: minRowIdx,
+          maxRow: maxRowIdx,
+          minCol: minColIdx,
+          maxCol: maxColIdx,
+        });
+      }
+    }
+
+    return sbCoords;
+  }
+
   ngOnInit(): void {
 
     const input = [
@@ -64,30 +95,28 @@ export class AppComponent {
     ];
 
     const gridData: CellDatum[][] = [];
-    for (let sbRowIdx = 0; sbRowIdx <= 2; sbRowIdx++) {
-      for (let sbColIdx = 0; sbColIdx <= 2; sbColIdx++) {
-        const minRowIdx = sbRowIdx * 3;
-        const maxRowIdx = (sbRowIdx+1) * 3 - 1;
-        const minColIdx = sbColIdx * 3;
-        const maxColIdx = (sbColIdx+1) * 3 - 1;
-        const subGrid: CellDatum[] = [];
-        for (let i = minRowIdx; i <= maxRowIdx; i++) {
-          for (let j = minColIdx; j <= maxColIdx; j++) {
-            const cell: CellDatum = {
-              content: input[i][j],
-              editable: false,
-              type: input[i][j] === '.' ? 'answer' : 'condition',
-              rowId: i,
-              colId: j,
-              id: i * 9 + j,
-            };
-            subGrid.push(cell);
-          }
+    const sbCoords = this.getSubboxArrangement();
+    for (const sbCoord of sbCoords) {
+      const { minRow, maxRow, minCol, maxCol } = sbCoord;
+      const subGrid: CellDatum[] = [];
+      for (let i = minRow; i <= maxRow; i++) {
+        for (let j = minCol; j <= maxCol; j++) {
+          const cell: CellDatum = {
+            content: input[i][j],
+            editable: false,
+            type: input[i][j] === '.' ? 'answer' : 'condition',
+            rowId: i,
+            colId: j,
+            id: i * 9 + j,
+            subboxId: gridData.length,
+          };
+          subGrid.push(cell);
         }
-        gridData.push(subGrid);
       }
+      gridData.push(subGrid);
     }
     this.gridData = gridData;
+    this.checkError();
 
     this._modeForm.valueChanges.subscribe((formValue) => {
       this._setMode(formValue.mode ?? this.defaultMode);
@@ -136,8 +165,6 @@ export class AppComponent {
   }
 
   toggleCellEditMode(cell: CellDatum): void {
-    console.log('click');
-    console.log(cell);
     if (cell.editable) {
       if (this.editingCell) {
         this.editingCell = undefined;
@@ -159,7 +186,7 @@ export class AppComponent {
   }
 
   private updateCellContent(cell: CellDatum, value: string): void {
-    this.gridData = this.gridData.map(row => row.map(c => {
+    this.gridData = this.gridData.map(sb => sb.map(c => {
       if (c.id === cell.id) {
         return { ...c, content: value };
       }
@@ -167,9 +194,117 @@ export class AppComponent {
         return c;
       }
     }));
+
+    this.checkError();
   }
 
-  test(): void {
-    console.log('test');
+  private checkError(): void {
+    const flatten: CellDatum[] = [];
+    for (const sb of this.gridData) {
+      for (const cell of sb) {
+        flatten.push({ ...cell, error: false });
+      }
+    }
+
+    flatten.sort((a, b) => {
+      if (a.rowId < b.rowId) {
+        return -1;
+      }
+      else if (a.rowId === b.rowId) {
+        return a.colId - b.colId;
+      }
+      else {
+        return 1;
+      }
+    });
+
+    const newGrid: CellDatum[][] = [];
+    for (let i = 0; i < 9; i++) {
+      newGrid.push([]);
+      for (let j = 0; j < 9; j++) {
+        const cell = flatten[i*9+j];
+        newGrid[newGrid.length-1].push(cell);
+      }
+    }
+
+    // 按行查错
+    for (let i = 0; i < 9; i++) {
+      for (let j = 0; j < 9; j++) {
+        const cell = newGrid[i][j];
+        let conflict = false;
+        for (let colId = 0; colId < 9; colId++) {
+          const compareCell = newGrid[i][colId];
+          if (cell.content === compareCell.content && cell.content !== '' && cell.content !== '.' && cell.id !== compareCell.id) {
+            compareCell.error = true;
+            conflict = true;
+          }
+        }
+
+        if (conflict) {
+          cell.error = true;
+          break;
+        }
+      }
+    }
+
+    // 按列查错
+    for (let j = 0; j < 9; j++) {
+      for (let i = 0; i < 9; i++) {
+        const cell = newGrid[i][j];
+        let conflict = false;
+        for (let rowId = 0; rowId < 9; rowId++) {
+          const compareCell = newGrid[rowId][j];
+          if (cell.content === compareCell.content && cell.content !== '' && cell.content !== '.' && cell.id !== compareCell.id) {
+            compareCell.error = true;
+            conflict = true;
+          }
+        }
+
+        if (conflict) {
+          cell.error = true;
+          break;
+        }
+      }
+    }
+
+    // 按子 box 查错
+    const sbCoords = this.getSubboxArrangement();
+    for (const sb of sbCoords) {
+      const { minRow, maxRow, minCol, maxCol } = sb;
+      for (let i = minRow; i <= maxRow; i++) {
+        for (let j = minCol; j<= maxCol; j++) {
+          const cell = newGrid[i][j];
+          let conflict = false;
+          for (let i1 = minRow; i1 <= maxRow; i1++) {
+            for (let i2 = minCol; i2 <= maxCol; i2++) {
+              const compareCell = newGrid[i][j];
+              if (compareCell.content === cell.content && cell.content !== '' && cell.content !== '.' && cell.id !== compareCell.id) {
+                compareCell.error = true;
+                conflict = true;
+              }
+            }
+          }
+
+          if (conflict) {
+            cell.error = true;
+            break;
+          }
+        }
+      }
+    }
+
+    // 更新
+    const newSubboxGrids: CellDatum[][] = [];
+    for (const coord of sbCoords) {
+      newSubboxGrids.push([]);
+      for (let row = coord.minRow; row <= coord.maxRow; row++) {
+        for (let col = coord.minCol; col <= coord.maxCol; col++) {
+          newSubboxGrids[newSubboxGrids.length-1].push(newGrid[row][col]);
+        }
+      }
+    }
+
+    this.gridData = newSubboxGrids;
   }
+  
 }

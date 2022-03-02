@@ -6,7 +6,7 @@
           <div
             class="cell"
             [style.backgroundColor]="cell.backgroundColor ?? 'unset'"
-            [ngClass]="{ 'cell-editable': cell.editable }"
+            [ngClass]="{ 'cell-editable': cell.editable, 'error': cell.error }"
             (mouseenter)="handleEnter(cell)"
             (mouseout)="handleOut()"
             (click)="toggleCellEditMode(cell)"
