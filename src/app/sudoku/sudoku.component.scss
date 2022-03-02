@@ -1,0 +1,38 @@
+.sub-grid-container {
+  border: 1px solid #ccc;
+  .sub-grid {
+    height: 100%;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+  }
+}
+
+.grid-container {
+  border: 2px solid #ccc;
+  height: 400px;
+  width: 400px;
+
+  .grid {
+    height: 100%;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+  }
+}
+
+.cell {
+  border: 1px solid #ccc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: default;
+}
+
+.cell-editable {
+  cursor: pointer;
+}
+
+.error {
+  color: #FE959F;
+}
