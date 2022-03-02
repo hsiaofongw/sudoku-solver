@@ -3,16 +3,18 @@
     <div *ngFor="let subgrid of gridData" class="sub-grid-container">
       <div class="sub-grid">
         <div
+          (click)="toggleCellEditMode(cell)"
           (mouseenter)="handleEnter(cell)"
           (mouseout)="handleOut()"
           *ngFor="let cell of subgrid"
           class="cell"
           [ngClass]="{
+            'highlight': editingCell?.id === cell.id,
             'cell-editable': cell.editable,
             'secondary-highlight':
               (cell.rowId === hoverCell?.rowId || cell.colId === hoverCell?.colId) &&
               (!(cell.rowId === hoverCell?.rowId && cell.colId === hoverCell?.colId)) &&
-              (hoverCell?.editable === true)
+              (hoverCell?.editable === true || editingCell !== undefined)
           }"
         >
           <ng-container *ngIf="cell.content !== '.'">{{
@@ -24,7 +26,7 @@
   </div>
 </div>
 
-<form [formGroup]="_modeForm">
+<form [formGroup]="_modeForm" *ngIf="editingCell === undefined">
   <p>工作模式：</p>
   <div>
     <ng-container *ngFor="let opt of modeOptions">
@@ -39,3 +41,9 @@
     </ng-container>
   </div>
 </form>
+
+<div *ngIf="editingCell">
+  <div>
+    <span>请按下某个数字键，或者再点一次活跃 Cell.</span>
+  </div>
+</div>

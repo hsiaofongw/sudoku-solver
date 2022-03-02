@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
+import { fromEvent, Subscription } from 'rxjs';
 import { solveRecursive, solveSudoku } from './solve';
 
 type CellDatum = {
@@ -43,6 +44,8 @@ export class AppComponent {
   });
 
   hoverCell: undefined | CellDatum = undefined;
+  editingCell: undefined | CellDatum = undefined;
+  keyPressSubscription?: Subscription;
 
   ngOnInit(): void {
 
@@ -107,10 +110,50 @@ export class AppComponent {
   }
 
   handleEnter(cell: CellDatum): void {
+    if (this.editingCell) {
+      return;
+    }
+
     this.hoverCell = cell;
   }
 
   handleOut(): void {
+    if (this.editingCell) {
+      return;
+    }
+
     this.hoverCell = undefined;
+  }
+
+  toggleCellEditMode(cell: CellDatum): void {
+    if (cell.editable) {
+      if (this.editingCell) {
+        this.editingCell = undefined;
+      }
+      else {
+        this.editingCell = cell;
+        this.keyPressSubscription = fromEvent(window, 'keypress').subscribe(event => {
+          const kbEvent = event as KeyboardEvent;
+          const key: string = kbEvent.key;
+          if (key.length === 1 && key.match(/[1-9]/)) {
+            this.updateCellContent(cell, key);
+          }
+
+          this.editingCell = undefined;
+          this.keyPressSubscription?.unsubscribe();
+        });
+      }
+    }
+  }
+
+  private updateCellContent(cell: CellDatum, value: string): void {
+    this.gridData = this.gridData.map(row => row.map(c => {
+      if (c.id === cell.id) {
+        return { ...c, content: value };
+      }
+      else {
+        return c;
+      }
+    }));
   }
 }
