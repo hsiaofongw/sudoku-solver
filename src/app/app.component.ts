@@ -90,7 +90,6 @@ export class AppComponent {
     this.gridData = gridData;
 
     this._modeForm.valueChanges.subscribe((formValue) => {
-      console.log({change:formValue});
       this._setMode(formValue.mode ?? this.defaultMode);
     });
   }
@@ -137,7 +136,8 @@ export class AppComponent {
   }
 
   toggleCellEditMode(cell: CellDatum): void {
-    console.log({click:cell});
+    console.log('click');
+    console.log(cell);
     if (cell.editable) {
       if (this.editingCell) {
         this.editingCell = undefined;
@@ -167,5 +167,9 @@ export class AppComponent {
         return c;
       }
     }));
+  }
+
+  test(): void {
+    console.log('test');
   }
 }

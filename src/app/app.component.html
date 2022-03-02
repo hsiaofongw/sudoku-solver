@@ -2,21 +2,20 @@
   <div class="grid">
     <div *ngFor="let subgrid of gridData" class="sub-grid-container">
       <div class="sub-grid">
-        <div
-          (click)="toggleCellEditMode(cell)"
-          (mouseenter)="handleEnter(cell)"
-          (mouseout)="handleOut()"
-          *ngFor="let cell of subgrid"
-          class="cell"
-          [style.backgroundColor]="cell.backgroundColor ?? 'unset'"
-          [ngClass]="{
-            'cell-editable': cell.editable
-          }"
-        >
-          <ng-container *ngIf="cell.content !== '.'">{{
-            cell.content
-          }}</ng-container>
-        </div>
+        <ng-container *ngFor="let cell of subgrid">
+          <div
+            class="cell"
+            [style.backgroundColor]="cell.backgroundColor ?? 'unset'"
+            [ngClass]="{ 'cell-editable': cell.editable }"
+            (mouseenter)="handleEnter(cell)"
+            (mouseout)="handleOut()"
+            (click)="toggleCellEditMode(cell)"
+          >
+            <ng-container *ngIf="cell.content !== '.'">{{
+              cell.content
+            }}</ng-container>
+          </div>
+        </ng-container>
       </div>
     </div>
   </div>
