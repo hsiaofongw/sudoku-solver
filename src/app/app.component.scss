@@ -1,16 +1,24 @@
+.sub-grid-container {
+  border: 1px solid #ccc;
+  .sub-grid {
+    height: 100%;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+  }
+}
+
 .grid-container {
-  width: 100px;
-  height: 100px;
-}
+  border: 2px solid #ccc;
+  height: 400px;
+  width: 400px;
 
-.grid-container > .grid {
-  height: 100%;
-}
-
-.grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: repeat(3, 1fr);
+  .grid {
+    height: 100%;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+  }
 }
 
 .cell {
