@@ -3,7 +3,7 @@ import { Component } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { fromEvent, interval, Subscription } from 'rxjs';
-import { solveRecursive, solveSudoku } from '../solve';
+import { solveSudoku } from '../solve';
 
 type CellDatum = {
   content: string;
@@ -110,6 +110,10 @@ export class SudokuComponent {
 
   ngOnInit(): void {
     interval(1000).subscribe(() => {
+      if (this.statEmptyCount === 0) {
+        return;
+      }
+
       const now = new Date();
       this.elapsedMs = now.valueOf() - this.statStartTime;
     });
@@ -452,5 +456,31 @@ export class SudokuComponent {
 
   reset(): void {
     this.loadFromURLParam(this.currentSetting);
+  }
+
+  solve(): void {
+    const boardData: string[][] = [];
+    for (let i = 0; i < 9; i++) {
+      const row: string[] = [];
+        boardData.push(row);
+      for (let j = 0; j < 9; j++) {
+        row.push('.');
+      }
+    }
+
+    for (const sb of this.gridData) {
+      for (const cell of sb) {
+        boardData[cell.rowId][cell.colId] = cell.content;
+      }
+    }
+
+    solveSudoku(boardData);
+
+    for (const sb of this.gridData) {
+      for (const cell of sb) {
+        this.updateCellContent(cell, boardData[cell.rowId][cell.colId]);
+      }
+    }
+
   }
 }

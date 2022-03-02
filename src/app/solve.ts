@@ -65,7 +65,7 @@ function getOptions(board: string[][], idx: number): string[] {
   return options;
 }
 
-export function solveRecursive(
+function solveRecursive(
   board: string[][],
   idx: number,
   state: { done: boolean }
