@@ -38,7 +38,15 @@
 </form>
 
 <div *ngIf="editingCell">
+  <p>提示：</p>
   <div>
     <span>请按下某个数字键，或者再点一次活跃 Cell.</span>
+  </div>
+</div>
+
+<div>
+  <p>操作：</p>
+  <div>
+    <button (click)="reset()">重置</button>
   </div>
 </div>

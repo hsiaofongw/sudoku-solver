@@ -1,4 +1,4 @@
-
+import { Location } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -37,10 +37,9 @@ type SubboxCoord = {
 @Component({
   selector: 'app-sudoku',
   templateUrl: './sudoku.component.html',
-  styleUrls: ['./sudoku.component.scss']
+  styleUrls: ['./sudoku.component.scss'],
 })
 export class SudokuComponent {
-
   readonly highlightColor = '#CDD7DD';
   readonly errorHighlightColor = '#FEBDC3';
   readonly defaultSettings = [
@@ -54,6 +53,8 @@ export class SudokuComponent {
     ['.', '.', '.', '4', '1', '9', '.', '.', '5'],
     ['.', '.', '.', '.', '8', '.', '.', '7', '9'],
   ];
+
+  private currentSetting = '';
 
   title = 'sudoku-solver';
 
@@ -81,7 +82,7 @@ export class SudokuComponent {
   statTotalCount = 0;
   statSuccess = false;
 
-  constructor(private route: ActivatedRoute, private router: Router) {}
+  constructor(private route: ActivatedRoute, private router: Router, private location: Location) {}
 
   /** 返回每个 sb 的 minRow, maxRow, minCol, maxCol,  */
   private getSubboxArrangement(): SubboxCoord[] {
@@ -132,16 +133,19 @@ export class SudokuComponent {
     });
 
     this.route.queryParams.subscribe((queryParams) => {
-      const setting = queryParams['setting'];
-
-      try {
-        const parsedInput = JSON.parse(setting);
-        const purifiedInput = this.purifyInput(parsedInput);
-        this.loadGrid(purifiedInput);
-      } catch (error) {
-        console.error(error);
-      }
+      this.currentSetting = queryParams['setting'];
+      this.loadFromURLParam(queryParams['setting']);
     });
+  }
+
+  private loadFromURLParam(setting: string): void {
+    try {
+      const parsedInput = JSON.parse(setting);
+      const purifiedInput = this.purifyInput(parsedInput);
+      this.loadGrid(purifiedInput);
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   private purifyInput(input: string[][]): string[][] {
@@ -437,6 +441,7 @@ export class SudokuComponent {
     this.statSuccess = succeeded;
   }
 
- 
-
+  reset(): void {
+    this.loadFromURLParam(this.currentSetting);
+  }
 }
