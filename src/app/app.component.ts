@@ -7,10 +7,10 @@ type CellDatum = {
   content: string;
   editable: boolean;
   type: 'condition' | 'answer';
-  secondaryHighlight?: boolean;
   rowId: number;
   colId: number;
   id: number;
+  backgroundColor?: string;
 };
 
 type Option = {
@@ -26,6 +26,9 @@ type Mode = 'readOnlyMode' | 'conditionWriteOnlyMode' | 'answerWriteOnlyMode' | 
   styleUrls: ['./app.component.scss'],
 })
 export class AppComponent {
+  readonly highlightColor = '#CDD7DD';
+  readonly errorHighlightColor = '#FEBDC3';
+
   title = 'sudoku-solver';
 
   gridData: CellDatum[][] = [];
@@ -43,7 +46,6 @@ export class AppComponent {
     mode: new FormControl('readOnlyMode'),
   });
 
-  hoverCell: undefined | CellDatum = undefined;
   editingCell: undefined | CellDatum = undefined;
   keyPressSubscription?: Subscription;
 
@@ -75,7 +77,6 @@ export class AppComponent {
               content: input[i][j],
               editable: false,
               type: input[i][j] === '.' ? 'answer' : 'condition',
-              secondaryHighlight: false,
               rowId: i,
               colId: j,
               id: i * 9 + j,
@@ -89,6 +90,7 @@ export class AppComponent {
     this.gridData = gridData;
 
     this._modeForm.valueChanges.subscribe((formValue) => {
+      console.log({change:formValue});
       this._setMode(formValue.mode ?? this.defaultMode);
     });
   }
@@ -114,7 +116,14 @@ export class AppComponent {
       return;
     }
 
-    this.hoverCell = cell;
+    this.gridData = this.gridData.map(row => row.map(col => {
+      if ((col.colId === cell.colId || col.rowId === cell.rowId) && cell.editable) {
+        return { ...col, backgroundColor: this.highlightColor };
+      }
+      else {
+        return { ...col, backgroundColor: 'unset' };
+      }
+    }));
   }
 
   handleOut(): void {
@@ -122,10 +131,13 @@ export class AppComponent {
       return;
     }
 
-    this.hoverCell = undefined;
+    this.gridData = this.gridData.map(row => row.map(col => {
+      return { ...col, backgroundColor: 'unset' };
+    }));
   }
 
   toggleCellEditMode(cell: CellDatum): void {
+    console.log({click:cell});
     if (cell.editable) {
       if (this.editingCell) {
         this.editingCell = undefined;

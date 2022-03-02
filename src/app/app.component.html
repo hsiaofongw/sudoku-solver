@@ -8,13 +8,9 @@
           (mouseout)="handleOut()"
           *ngFor="let cell of subgrid"
           class="cell"
+          [style.backgroundColor]="cell.backgroundColor ?? 'unset'"
           [ngClass]="{
-            'highlight': editingCell?.id === cell.id,
-            'cell-editable': cell.editable,
-            'secondary-highlight':
-              (cell.rowId === hoverCell?.rowId || cell.colId === hoverCell?.colId) &&
-              (!(cell.rowId === hoverCell?.rowId && cell.colId === hoverCell?.colId)) &&
-              (hoverCell?.editable === true || editingCell !== undefined)
+            'cell-editable': cell.editable
           }"
         >
           <ng-container *ngIf="cell.content !== '.'">{{
